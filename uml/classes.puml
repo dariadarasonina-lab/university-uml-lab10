@@ -1,0 +1,83 @@
+@startuml
+title Диаграмма классов · Университетская информационная система
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam dpi 140
+hide circle
+abstract class Employee {
+  + ssn: str
+  + name: str
+  + email: str
+  - __post_init__(): None
+}
+class AdministrativeEmployee {
+}
+class Researcher {
+  + research_area: str
+  + institutes: tuple[Institute, ...]
+  + participations: dict[str, Participation]
+  - __post_init__(): None
+  + assign_project(project: Project, hours: int): Participation
+}
+class Lecturer {
+  + courses: dict[int, Course]
+  + assign_course(course: Course): None
+}
+class Institute {
+  + name: str
+  + address: str
+}
+class Faculty {
+  + name: str
+  + institutes: dict[str, Institute]
+  + dean: Employee
+  - __post_init__(): None
+}
+class Project {
+  + name: str
+  + starting_date: date
+  + end_date: date
+  - __post_init__(): None
+}
+class Participation {
+  + project: Project
+  + hours: int
+  - __post_init__(): None
+}
+class Course {
+  + number: int
+  + name: str
+  + weekly_duration: int
+  - __post_init__(): None
+}
+class University {
+  + name: str
+  + faculties: dict[str, Faculty]
+  + employees: dict[str, Employee]
+  + projects: dict[str, Project]
+  + courses: dict[int, Course]
+  - __post_init__(): None
+  + employee_count(): int
+  + overview(): str
+  + register_researcher(ssn: str, name: str, email: str, research_area: str, institute_names: tuple[str, ...], lecturer: bool): Researcher
+  + assign_project(ssn: str, project_name: str, hours: int): Participation
+  + assign_course(ssn: str, course_number: int): Course
+  + workload(ssn: str): str
+  - _researcher(ssn: str): Researcher
+}
+Employee <|-- AdministrativeEmployee
+Employee <|-- Researcher
+Researcher <|-- Lecturer
+Researcher "0..*" --> "1..*" Institute : institutes
+Researcher "1" *-- "0..*" Participation : participations
+Lecturer "0..*" --> "0..*" Course : courses
+Faculty "1" *-- "1..*" Institute : institutes
+Faculty "0..*" --> "1" Employee : dean
+Participation "0..*" --> "1" Project : project
+University "1" *-- "1..*" Faculty : faculties
+University "1" o-- "1..*" Employee : employees
+University "1" o-- "0..*" Project : projects
+University "1" o-- "0..*" Course : courses
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+title UC-03 · Назначить участие в проекте
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam dpi 150
+hide footbox
+actor "Сотрудник\nучебного отдела" as Staff
+participant "university : University" as University
+participant "researcher : Researcher" as Researcher
+
+Staff -> University : assign_project(ssn, project_name, hours)
+activate University
+University -> University : _researcher(ssn)
+alt Сотрудник и проект найдены
+  University -> Researcher : assign_project(project, hours)
+  activate Researcher
+  alt Участие уже зарегистрировано
+    Researcher --> University : ValueError
+    University --> Staff : Сообщение об ошибке
+  else Новое участие
+    create participant "participation : Participation" as Participation
+    Researcher -> Participation : <<create>> Participation(project, hours)
+    Participation -> Participation : ~_~_post_init~_~_()
+    alt Часы положительны
+      Participation --> Researcher : participation
+      note right of Researcher : Запись сохраняется\nв participations
+      Researcher --> University : participation
+      University --> Staff : Подтверждение
+    else Часы неположительны
+      Participation --> Researcher : ValueError
+      Researcher --> University : ValueError
+      University --> Staff : Сообщение об ошибке
+    end
+  end
+  deactivate Researcher
+else Сотрудник или проект отсутствует
+  University --> Staff : Сообщение об ошибке
+end
+deactivate University
+@enduml
